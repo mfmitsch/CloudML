@@ -1,0 +1,81 @@
+openapi: 3.0.0
+info:
+  version: "1.0.0-oas3"
+  title: Cloud Machine Learning
+  description: Interact with MySQL database for models and data
+  termsOfService: 'http://swagger.io/terms/'
+  contact:
+    name: 'Michael Mitsch'
+  license:
+    name: Apache
+
+paths:
+  '/data/add/{datasetName}/{googleSheetID}/{keyColumn}':
+    get:
+      operationId: AddSqlData.AddToExistingDataTable
+      description: add data to the sql database
+      parameters:
+        - name: datasetName
+          in: path
+          description: name for dataset
+          required: true
+          schema:
+            type: string
+        - name: googleSheetID
+          in: path
+          description: sheet to pull data from
+          required: true
+          schema:
+            type: string
+        - name: keyColumn
+          in: path
+          description: column in the dataset that contains key (ie target value in training)
+          required: true
+          schema:
+            type: string
+
+      responses:
+        '200':
+          description: Dataset stored
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/responImage"
+  '/test/{val}':
+    get:
+      operationId: Server.test
+      description: Displays upload file page
+      parameters:
+        - name: val
+          in: path
+          description: test value
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Upload page displayed successfully
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/responImage"              
+
+servers:
+  - url: http://localhost:8080/api/
+components:
+  schemas:
+    responString:
+      type: object
+      required:
+        - model
+      properties:
+        model:
+          type: string
+    responImage:
+      type: object
+      required:
+        - model
+      properties:
+        model:
+          type: string
+          format: binary
