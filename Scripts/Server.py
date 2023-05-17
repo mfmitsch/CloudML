@@ -17,8 +17,6 @@ app = connexion.App(__name__, specification_dir="./")
 
 app.add_api("master.yaml")
 
-#DataBaseConnection = AddSqlData.MakeMySqlConnection()
-
 @app.route("/")
 def home():
     msg = {"msg": "It's working!"}
@@ -26,4 +24,5 @@ def home():
 
 
 if __name__ == "__main__":
-    app.run(port=8080, debug=False)
+   AddSqlData.MakeMySqlConnection()
+   app.run(port=8080, debug=False)

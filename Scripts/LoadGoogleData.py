@@ -12,7 +12,7 @@ def google_data_Server(id):
    url = 'https://drive.google.com/uc?export=download&id=' + id
    r = requests.get(url, allow_redirects=True)
    string_csv = r.content.decode('utf-8').split('\n')
-   features = string_csv[0].split(",")[1:]
+   features = string_csv[0].split(",")[1:]   
    data = [eval('['+line+']')[1:] for line in string_csv[1:len(string_csv)-1]]
    df = pd.DataFrame(data, columns = features) 
    return df
