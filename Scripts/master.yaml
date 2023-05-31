@@ -41,6 +41,18 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/responImage"
+  '/data/datasets':
+    get:
+      operationId: AddSqlData.GetDatasets
+      description: show names of datasets contained in the datasets table
+      responses:
+        '200':
+          description: Datasets displated
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/responImage"
+
   '/test/{val}':
     get:
       operationId: Server.test

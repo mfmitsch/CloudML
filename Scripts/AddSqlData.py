@@ -9,24 +9,25 @@ import pymysql
 from flask import Flask, render_template, request,jsonify
 import LoadGoogleData
 import pickle
+import getpass
 
 ADD_DATA_INSTANCE_SQL = '''
 insert into dataInstances(datasetId,
                           featureValues,
                           keyValue)
-values('%s',%s,%s)
+values('%s','%s','%s')
 '''
 ADD_MODEL_INSTANCE_SQL = '''
-insert into dataInstances(datasetId,
+insert into models(datasetId,
                           model)
-values('%s',%s)
+values('%s','%s')
 '''
 ADD_DATASET_SQL = '''
-insert into dataInstances(datasetId,
+insert into datasets(datasetId,
                           featureNames,
                           dataName,
                           targetName)
-values('%s',%s,'%s','%s')
+values('%s','%s','%s','%s')
 '''
 db = None
 
@@ -34,7 +35,7 @@ def MakeMySqlConnection():
    while(True):
       try:
          username = input("MySQL database master username: ")
-         password = input("MySQL database password: ")
+         password = getpass.getpass()
          host = input("MySQL host url: ")
          global db
          db = pymysql.connect(host=host, user=username, password=password, database="TrainingData")
@@ -45,8 +46,9 @@ def MakeMySqlConnection():
             continue
       return
    
-         
-
+def GetDatasets():
+   sql = '''select dataName from datasets'''        
+   
 
 def CreateTrainingDataTable(db):
    sql = '''create table dataInstances ( instanceId int not null auto_increment, datasetId varchar(100), featureValues BLOB, 
@@ -73,14 +75,21 @@ def AddToExistingDataTable(datasetName, googleSheetID, keyColumn):
    featureDataFrame = df.drop(columns = [keyColumn])
    featureNames = featureDataFrame.columns
    featureValues = featureDataFrame.values
-   pickledFeatureNames = pickle.dumps(featureNames)
+   pickledFeatureNames = str(pickle.dumps(featureNames,0))[2:-1]
+   #pickledFeatureNames = pickle.dumps(featureNames).decode()
    cursor = db.cursor()
    sql = ADD_DATASET_SQL % (googleSheetID,pickledFeatureNames,datasetName,keyColumn)
    cursor.execute(sql)
    
    for instance, target in zip(featureValues,targetValues):
-      pickledFeatureValue = pickle.dumps(instance)
-      cursor.execute(ADD_DATA_INSTANCE_SQL % (googleSheetID,pickledFeatureValue,str(target)))
+      pickledFeatureValue = str(pickle.dumps(instance,0))[2:-1]
+      #pickledFeatureValue = pickle.dumps(instance).decode()
+      sql = ADD_DATA_INSTANCE_SQL % (googleSheetID,pickledFeatureValue,str(target))
+      try:
+         cursor.execute(sql)
+      except:
+         print("data skipped")
+         #print(instance)
    
    db.commit()
    
@@ -89,5 +98,8 @@ def AddToExistingDataTable(datasetName, googleSheetID, keyColumn):
           "key": keyColumn}
    return jsonify(msg)
 
-def AddTrainedModel(db):
-   pass
+def AddTrainedModel(model, dataSetId):
+   cursor = db.cursor()
+   sql = ADD_MODEL_INSTANCE_SQL % (dataSetId, model.decode())
+   cursor.execute(sql)
+   db.commit()

@@ -8,6 +8,7 @@ Created on Sat May 13 15:16:02 2023
 import connexion
 from flask import Flask, render_template, request,jsonify
 import AddSqlData
+import requests
 
 def test(i):
    msg = {"msg": i}
@@ -22,6 +23,11 @@ def home():
     msg = {"msg": "It's working!"}
     return jsonify(msg)
 
+@app.route("/add/model", methods=['POST'])
+def addModel():
+   serializedModel = request.data
+   AddSqlData.AddTrainedModel(serializedModel)
+   return
 
 if __name__ == "__main__":
    AddSqlData.MakeMySqlConnection()
